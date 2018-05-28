@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="277dp"
+        android:layout_alignParentTop="true"
+        android:scaleType="fitXY"
+        android:id="@+id/movie_image"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/movie_image"
+        android:textColor="@android:color/white"
+        android:background="#BF808080"
+        android:textSize="20sp"
+        android:id="@+id/movie_name"/>
+</RelativeLayout>

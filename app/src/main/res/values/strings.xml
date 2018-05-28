@@ -1,3 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Popular Movies</string>
+
+    <string name="action_top_rated">Top Rated</string>
+    <string name="action_now_playing">Now Playing</string>
+    <string name="action_most_popular">Most Popular</string>
+
+    <string name="error_message">
+        An error has occurred. Please try again by clicking an option in menu.
+    </string>
 </resources>
