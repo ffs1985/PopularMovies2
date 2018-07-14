@@ -20,17 +20,19 @@ public class TheMovieDBUtils {
     private static final String TOP_RATED_PATH = "top_rated";
     private static final String MOST_POPULAR_PATH = "popular";
     private static final String NOW_PLAYING_PATH = "now_playing";
+    private static final String GET_REVIEWS_PATH = "reviews";
+    private static final String GET_VIDEOS_PATH = "videos";
 
-    public static URL buildUrl(String path) {
-        Uri builtUri = Uri.parse(BASE_PATH).buildUpon()
-                .appendPath(MOVIE_PATH)
-                .appendPath(path)
-                .appendQueryParameter(API_KEY_PARAM, API_KEY)
-                .build();
+    public static URL buildUrl(String path, String movieId) {
+        Uri.Builder builder = Uri.parse(BASE_PATH).buildUpon().appendPath(MOVIE_PATH);
+        if(movieId != null) {
+            builder.appendPath(movieId);
+        }
+        builder.appendPath(path).appendQueryParameter(API_KEY_PARAM, API_KEY);
 
         URL url = null;
         try {
-            url = new URL(builtUri.toString());
+            url = new URL(builder.build().toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -38,6 +40,10 @@ public class TheMovieDBUtils {
         Log.v(TAG, "Built URI " + url);
 
         return url;
+    }
+
+    public static URL buildUrl(String path) {
+        return buildUrl(path, null);
     }
 
     public static String topRatedList() {
@@ -61,6 +67,26 @@ public class TheMovieDBUtils {
 
     public static String mostPopularList() {
         URL url = buildUrl(MOST_POPULAR_PATH);
+        try {
+            return getResponseFromHttpUrl(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getMovieReviews(String movieId) {
+        URL url = buildUrl(GET_REVIEWS_PATH, movieId);
+        try {
+            return getResponseFromHttpUrl(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getMovieTrailers(String movieId) {
+        URL url = buildUrl(GET_VIDEOS_PATH, movieId);
         try {
             return getResponseFromHttpUrl(url);
         } catch (IOException e) {

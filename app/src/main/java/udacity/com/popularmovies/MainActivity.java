@@ -14,6 +14,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.List;
+
+import udacity.com.popularmovies.model.FavoriteDatabase;
 import udacity.com.popularmovies.model.Movie;
 import udacity.com.popularmovies.utils.MoviesJsonUtil;
 import udacity.com.popularmovies.utils.MovieSearchType;
@@ -29,13 +32,17 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private ProgressBar mLoadingIndicator;
     private static final String movieData = "movie_data";
 
+    private FavoriteDatabase mDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_movie);
-        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+        mRecyclerView = findViewById(R.id.recyclerview_movie);
+        mErrorMessageDisplay = findViewById(R.id.tv_error_message_display);
+
+        mDb = FavoriteDatabase.getsInstance(getApplicationContext());
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         mRecyclerView.setLayoutManager(gridLayoutManager);
@@ -43,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mMovieAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
         loadMoviesData(MovieSearchType.MOST_POPULAR);
     }
 
@@ -81,7 +88,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         @Override
         protected Movie[] doInBackground(String... params) {
             try {
-                String jsonMovieResponse;
+                String jsonMovieResponse = null;
+                Movie[] simpleJsonMovieData = null;
                 if(params.length > 0) {
                    MovieSearchType searchType = MovieSearchType.valueOf(params[0]);
                    switch (searchType) {
@@ -93,6 +101,14 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                            jsonMovieResponse = TheMovieDBUtils
                                    .mostPopularList();
                            break;
+                       case FAVORITES:
+                            List<Movie> movies = mDb.movieDAO().loadFavoriteMovies();
+                            if (movies.size() > 0) {
+                                simpleJsonMovieData = new Movie[movies.size()];
+                                simpleJsonMovieData =  movies.toArray(simpleJsonMovieData);
+                            } else {
+                                simpleJsonMovieData = new Movie[0];
+                            }
                        case MOST_POPULAR:
                        default:
                            jsonMovieResponse = TheMovieDBUtils
@@ -103,9 +119,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                     jsonMovieResponse = TheMovieDBUtils
                             .mostPopularList();
                 }
-                Movie[] simpleJsonMovieData = MoviesJsonUtil.convertJsonToList(jsonMovieResponse);
-
-                return simpleJsonMovieData;
+                if (simpleJsonMovieData == null) {
+                    simpleJsonMovieData = MoviesJsonUtil.convertJsonToMoviesList(jsonMovieResponse);
+                }
+            return simpleJsonMovieData;
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -150,6 +167,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             mMovieAdapter.setMovieData(null);
             loadMoviesData(MovieSearchType.TOP_RATED);
             return true;
+        }
+        if (id == R.id.action_favorites) {
+            mMovieAdapter.setMovieData(null);
+            loadMoviesData(MovieSearchType.FAVORITES);
         }
         return super.onOptionsItemSelected(item);
     }

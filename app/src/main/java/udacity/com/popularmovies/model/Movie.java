@@ -1,16 +1,25 @@
 package udacity.com.popularmovies.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
-public class Movie implements Parcelable{
+@Entity
+public class Movie implements Parcelable {
+    @PrimaryKey
+    @NonNull
+    private String movieId;
     private String name;
     private int rating;
     private String description;
     private String imagePath;
     private String backdropPath;
 
-    public Movie(String name, int rating, String description, String imagePath, String backdropPath) {
+    public Movie(String movieId, String name, int rating, String description, String imagePath, String backdropPath) {
+        this.movieId = movieId;
         this.name = name;
         this.rating = rating;
         this.description = description;
@@ -18,7 +27,9 @@ public class Movie implements Parcelable{
         this.backdropPath = backdropPath;
     }
 
+    @Ignore
     public Movie(Parcel parcel) {
+        this.movieId = parcel.readString();
         this.name = parcel.readString();
         this.rating = parcel.readInt();
         this.description = parcel.readString();
@@ -26,6 +37,7 @@ public class Movie implements Parcelable{
         this.backdropPath = parcel.readString();
     }
 
+    @Ignore
     public Movie() {
         super();
     }
@@ -41,6 +53,14 @@ public class Movie implements Parcelable{
             return new Movie[size];
         }
     };
+
+    public String getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(String movieId) {
+        this.movieId = movieId;
+    }
 
     public String getName() {
         return name;
@@ -89,6 +109,7 @@ public class Movie implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(this.getMovieId());
         parcel.writeString(this.getName());
         parcel.writeInt(this.getRating());
         parcel.writeString(this.getDescription());

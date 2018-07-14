@@ -5,8 +5,11 @@
     <string name="action_top_rated">Top Rated</string>
     <string name="action_now_playing">Now Playing</string>
     <string name="action_most_popular">Most Popular</string>
+    <string name="action_favorites">Favorites</string>
 
     <string name="error_message">
         An error has occurred. Please try again by clicking an option in menu.
     </string>
+    <string name="movie_play_icon_text">Play</string>
+    <string name="action_favorite">Add as a Favorite</string>
 </resources>

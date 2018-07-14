@@ -6,5 +6,6 @@ package udacity.com.popularmovies.utils;
 public enum MovieSearchType {
     TOP_RATED,
     NOW_PLAYING,
-    MOST_POPULAR
+    MOST_POPULAR,
+    FAVORITES
 }
