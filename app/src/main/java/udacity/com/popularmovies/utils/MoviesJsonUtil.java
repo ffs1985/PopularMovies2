@@ -8,7 +8,7 @@ import udacity.com.popularmovies.model.Movie;
 import udacity.com.popularmovies.model.MovieReview;
 import udacity.com.popularmovies.model.MovieVideo;
 
-public class MoviesJsonUtil {
+public final class MoviesJsonUtil {
     private static final String TAG = MoviesJsonUtil.class.getSimpleName();
     private static final String IMAGE_BASE_PATH = "http://image.tmdb.org/t/p/";
     private static final String POSTER_BASE_PATH = IMAGE_BASE_PATH + "w342";
@@ -19,6 +19,7 @@ public class MoviesJsonUtil {
     private static final String JSON_OVERVIEW_FIELD = "overview";
     private static final String JSON_POSTER_FIELD = "poster_path";
     private static final String JSON_VOTE_AVG_FIELD = "vote_average";
+    private static final String JSON_RELEASE_DATE_FIELD = "release_date";
     private static final String JSON_BACKDROP_FIELD = "backdrop_path";
     private static final String YOUTUBE_SITE = "YouTube";
 
@@ -29,6 +30,8 @@ public class MoviesJsonUtil {
     private static final String JSON_SITE = "site";
     private static final String JSON_KEY = "key";
     private static final String YOUTUBE_THUMBNAIL_REGEX = "https://img.youtube.com/vi/%s/0.jpg";
+
+    private MoviesJsonUtil(){}
 
     public static Movie[] convertJsonToMoviesList(String json) {
         try {
@@ -82,6 +85,7 @@ public class MoviesJsonUtil {
         movie.setDescription((String)jsonMovie.get(JSON_OVERVIEW_FIELD));
         movie.setImagePath(POSTER_BASE_PATH + jsonMovie.get(JSON_POSTER_FIELD));
         movie.setRating(((Number)jsonMovie.get(JSON_VOTE_AVG_FIELD)).intValue());
+        movie.setReleaseDate((String)jsonMovie.get(JSON_RELEASE_DATE_FIELD));
 
         if(!jsonMovie.isNull(JSON_BACKDROP_FIELD)) {
             movie.setBackdropPath(BACKDROP_BASE_PATH + jsonMovie.get(JSON_BACKDROP_FIELD));

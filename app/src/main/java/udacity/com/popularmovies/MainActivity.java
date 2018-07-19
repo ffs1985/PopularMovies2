@@ -6,13 +6,12 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.util.List;
 
@@ -27,12 +26,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private RecyclerView mRecyclerView;
     private MovieAdapter mMovieAdapter;
 
-    private TextView mErrorMessageDisplay;
-
-    private ProgressBar mLoadingIndicator;
     private static final String movieData = "movie_data";
 
     private FavoriteDatabase mDb;
+
+    private MovieSearchType movieSearchType = MovieSearchType.MOST_POPULAR;
+
+    private int mScrollPosition = RecyclerView.NO_POSITION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         setContentView(R.layout.activity_main);
 
         mRecyclerView = findViewById(R.id.recyclerview_movie);
-        mErrorMessageDisplay = findViewById(R.id.tv_error_message_display);
 
         mDb = FavoriteDatabase.getsInstance(getApplicationContext());
 
@@ -50,12 +49,35 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mMovieAdapter = new MovieAdapter(this);
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
-        loadMoviesData(MovieSearchType.MOST_POPULAR);
+        loadMoviesData(movieSearchType);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("filter", movieSearchType.name());
+
+        LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if(layoutManager != null && layoutManager instanceof LinearLayoutManager){
+            mScrollPosition = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
+        }
+        outState.putInt("scroll_position", mScrollPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            movieSearchType = MovieSearchType.valueOf(savedInstanceState.getString("filter"));
+            loadMoviesData(movieSearchType);
+
+            mScrollPosition = savedInstanceState.getInt("scroll_position");
+            mRecyclerView.smoothScrollToPosition(mScrollPosition);
+            mRecyclerView.getLayoutManager().scrollToPosition(mScrollPosition);
+        }
     }
 
     private void loadMoviesData(MovieSearchType action) {
-        showMovieDataView();
         new FetchMovieSearchTask().execute(action.name());
     }
 
@@ -68,23 +90,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         startActivity(intentToStartDetailActivity);
     }
 
-    private void showMovieDataView() {
-        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-        mRecyclerView.setVisibility(View.VISIBLE);
-    }
-
-    private void showErrorMessage() {
-        mRecyclerView.setVisibility(View.INVISIBLE);
-        mErrorMessageDisplay.setVisibility(View.VISIBLE);
-    }
-
     public class FetchMovieSearchTask extends AsyncTask<String, Void, Movie[]> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
         @Override
         protected Movie[] doInBackground(String... params) {
             try {
@@ -99,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                            break;
                        case NOW_PLAYING:
                            jsonMovieResponse = TheMovieDBUtils
-                                   .mostPopularList();
+                                   .nowPlayingList();
                            break;
                        case FAVORITES:
                             List<Movie> movies = mDb.movieDAO().loadFavoriteMovies();
@@ -132,12 +138,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         @Override
         protected void onPostExecute(Movie[] movieListData) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (movieListData != null) {
-                showMovieDataView();
                 mMovieAdapter.setMovieData(movieListData);
-            } else {
-                showErrorMessage();
+            }
+            if (mRecyclerView != null && mScrollPosition != RecyclerView.NO_POSITION) {
+                mRecyclerView.smoothScrollToPosition(mScrollPosition);
+                mRecyclerView.getLayoutManager().scrollToPosition(mScrollPosition);
             }
         }
     }
@@ -155,23 +161,22 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         if (id == R.id.action_most_popular) {
             mMovieAdapter.setMovieData(null);
-            loadMoviesData(MovieSearchType.MOST_POPULAR);
-            return true;
+            movieSearchType = MovieSearchType.MOST_POPULAR;
         }
         if (id == R.id.action_now_playing) {
             mMovieAdapter.setMovieData(null);
-            loadMoviesData(MovieSearchType.NOW_PLAYING);
-            return true;
+            movieSearchType = MovieSearchType.NOW_PLAYING;
         }
         if (id == R.id.action_top_rated) {
             mMovieAdapter.setMovieData(null);
-            loadMoviesData(MovieSearchType.TOP_RATED);
-            return true;
+            movieSearchType = MovieSearchType.TOP_RATED;
         }
         if (id == R.id.action_favorites) {
             mMovieAdapter.setMovieData(null);
-            loadMoviesData(MovieSearchType.FAVORITES);
+            movieSearchType = MovieSearchType.FAVORITES;
         }
+        mScrollPosition = 0;
+        loadMoviesData(movieSearchType);
         return super.onOptionsItemSelected(item);
     }
 }

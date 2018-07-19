@@ -34,6 +34,7 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
     private TextView tvDescription;
     private ImageView ivPoster;
     private RatingBar rvRating;
+    private TextView tvReleaseDate;
     private Movie movie;
     private static final String movieData = "movie_data";
     private boolean isFavorite = false;
@@ -56,6 +57,7 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
         ivPoster = findViewById(R.id.ivPoster);
         rvRating = findViewById(R.id.ratingBar);
         rvRating.setMax(10);
+        tvReleaseDate = findViewById(R.id.tvReleaseDate);
 
         mDb = FavoriteDatabase.getsInstance(getApplicationContext());
 
@@ -70,6 +72,7 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
             Picasso.get().load(movie.getBackdropPath())
                     .placeholder(R.drawable.placeholder).into(ivPoster);
             rvRating.setRating(movie.getRating());
+            tvReleaseDate.setText(String.format("Release Date: %s", movie.getReleaseDate()));
 
             LinearLayoutManager movieVideosLinearLayoutManager = new LinearLayoutManager(this);
             movieVideosLinearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);

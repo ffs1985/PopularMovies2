@@ -10,12 +10,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
+import udacity.com.popularmovies.BuildConfig;
+
 public class TheMovieDBUtils {
     private static final String TAG = TheMovieDBUtils.class.getSimpleName();
 
     private static final String BASE_PATH = "https://api.themoviedb.org/3";
     private static final String API_KEY_PARAM = "api_key";
-    private static final String API_KEY = "";
+    private static final String API_KEY = BuildConfig.ApiKey;
     private static final String MOVIE_PATH = "movie";
     private static final String TOP_RATED_PATH = "top_rated";
     private static final String MOST_POPULAR_PATH = "popular";

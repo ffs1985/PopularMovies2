@@ -17,14 +17,16 @@ public class Movie implements Parcelable {
     private String description;
     private String imagePath;
     private String backdropPath;
+    private String releaseDate;
 
-    public Movie(String movieId, String name, int rating, String description, String imagePath, String backdropPath) {
+    public Movie(String movieId, String name, int rating, String description, String imagePath, String backdropPath, String releaseDate) {
         this.movieId = movieId;
         this.name = name;
         this.rating = rating;
         this.description = description;
         this.imagePath = imagePath;
         this.backdropPath = backdropPath;
+        this.releaseDate = releaseDate;
     }
 
     @Ignore
@@ -35,6 +37,7 @@ public class Movie implements Parcelable {
         this.description = parcel.readString();
         this.imagePath = parcel.readString();
         this.backdropPath = parcel.readString();
+        this.releaseDate = parcel.readString();
     }
 
     @Ignore
@@ -102,6 +105,14 @@ public class Movie implements Parcelable {
         this.backdropPath = backdropPath;
     }
 
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -114,6 +125,7 @@ public class Movie implements Parcelable {
         parcel.writeInt(this.getRating());
         parcel.writeString(this.getDescription());
         parcel.writeString(this.getImagePath());
-        parcel.writeString(this.backdropPath);
+        parcel.writeString(this.getBackdropPath());
+        parcel.writeString(this.getReleaseDate());
     }
 }

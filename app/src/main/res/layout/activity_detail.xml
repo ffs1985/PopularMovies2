@@ -26,7 +26,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginLeft="16dp"
-                android:textSize="30sp" />
+                android:textSize="30sp"
+                tools:text="Movie Title"/>
+
+            <TextView
+                android:id="@+id/tvReleaseDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="Release Date:" />
 
             <TextView
                 android:id="@+id/tvDescription"
@@ -67,7 +75,6 @@
                 android:id="@+id/recyclerview_movie_reviews"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

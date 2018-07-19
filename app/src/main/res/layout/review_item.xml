@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -11,10 +12,12 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:id="@+id/movie_review_author"
-        android:layout_marginBottom="15dp"/>
+        android:layout_marginBottom="15dp"
+        tools:text="Review Author"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:id="@+id/movie_review_content"/>
+        android:id="@+id/movie_review_content"
+        tools:text="Review Content"/>
 </LinearLayout>
