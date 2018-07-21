@@ -4,6 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import udacity.com.popularmovies.model.Movie;
 import udacity.com.popularmovies.model.MovieReview;
 import udacity.com.popularmovies.model.MovieVideo;
@@ -33,13 +36,13 @@ public final class MoviesJsonUtil {
 
     private MoviesJsonUtil(){}
 
-    public static Movie[] convertJsonToMoviesList(String json) {
+    public static List<Movie> convertJsonToMoviesList(String json) {
         try {
             JSONObject jsonObject = new JSONObject(json);
             JSONArray results = (JSONArray)jsonObject.get(JSON_RESULTS_FIELD);
-            Movie[] movies = new Movie[results.length()];
+            List<Movie> movies = new ArrayList<>();
             for (int i = 0; i < results.length(); i++) {
-               movies[i] = parseJsonMovie((JSONObject)results.get(i));
+               movies.add(parseJsonMovie((JSONObject)results.get(i)));
             }
             return movies;
         } catch (JSONException e) {

@@ -1,5 +1,6 @@
 package udacity.com.popularmovies.model;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -10,7 +11,7 @@ import java.util.List;
 @Dao
 public interface MovieDAO {
     @Query("SELECT * FROM Movie")
-    List<Movie> loadFavoriteMovies();
+    LiveData<List<Movie>> loadFavoriteMovies();
 
     @Insert
     void insertMovie(Movie movie);
@@ -19,5 +20,5 @@ public interface MovieDAO {
     void deleteMovie(Movie movie);
 
     @Query("SELECT * FROM Movie WHERE movieId = :movieId")
-    Movie load(String movieId);
+    LiveData<Movie> load(String movieId);
 }

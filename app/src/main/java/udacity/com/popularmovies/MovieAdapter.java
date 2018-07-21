@@ -9,6 +9,8 @@ import android.widget.TextView;
 import android.support.v7.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 
+import java.util.List;
+
 import udacity.com.popularmovies.model.Movie;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
@@ -70,8 +72,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         return mMovieListData.length;
     }
 
-    public void setMovieData(Movie[] movieData) {
-        mMovieListData = movieData;
+    public void setMovieData(List<Movie> movieData) {
+        Movie[] moviesArray = null;
+        if (movieData != null) {
+            moviesArray = new Movie[movieData.size()];
+            moviesArray = movieData.toArray(moviesArray);
+        }
+        mMovieListData = moviesArray;
         notifyDataSetChanged();
+
     }
 }

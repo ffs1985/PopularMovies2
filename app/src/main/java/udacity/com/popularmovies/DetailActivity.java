@@ -1,11 +1,14 @@
 package udacity.com.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -182,15 +185,26 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
     }
 
     public class LoadFavoriteTask extends AsyncTask<String, Void, Void> {
+        private DetailActivity activity;
+
+        public LoadFavoriteTask(DetailActivity a) {
+            this.activity = a;
+        }
         @Override
         protected Void doInBackground(String... params) {
-            Movie favMovie = mDb.movieDAO().load(params[0]);
-            try {
-                isFavorite = favMovie != null;
-                updateFavoriteStatus(isFavorite);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            final LiveData<Movie> favMovie = mDb.movieDAO().load(params[0]);
+            favMovie.observe(activity, new Observer<Movie>() {
+                @Override
+                public void onChanged(@Nullable Movie movie) {
+                    favMovie.removeObserver(this);
+                    try {
+                        isFavorite = movie != null;
+                        updateFavoriteStatus(isFavorite);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
             return null;
         }
     }
@@ -204,7 +218,7 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
         } else {
             menu.getItem(0).setIcon(R.drawable.ic_favorite_border_white_48dp);
         }
-        new LoadFavoriteTask().execute(movie.getMovieId());
+        new LoadFavoriteTask(this).execute(movie.getMovieId());
         this.menu = menu;
         return true;
     }

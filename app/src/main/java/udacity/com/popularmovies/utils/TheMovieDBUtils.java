@@ -48,6 +48,19 @@ public class TheMovieDBUtils {
         return buildUrl(path, null);
     }
 
+    public static String searchMovies(MovieSearchType movieSearchType) {
+        switch (movieSearchType) {
+            case TOP_RATED:
+                return topRatedList();
+            case NOW_PLAYING:
+                return nowPlayingList();
+            case MOST_POPULAR:
+                return mostPopularList();
+            default:
+                throw new RuntimeException("Invalid Search");
+        }
+    }
+
     public static String topRatedList() {
         URL url = buildUrl(TOP_RATED_PATH);
         try {

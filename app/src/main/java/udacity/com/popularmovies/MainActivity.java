@@ -1,8 +1,11 @@
 package udacity.com.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import udacity.com.popularmovies.model.FavoriteDatabase;
@@ -21,7 +25,7 @@ import udacity.com.popularmovies.utils.MoviesJsonUtil;
 import udacity.com.popularmovies.utils.MovieSearchType;
 import udacity.com.popularmovies.utils.TheMovieDBUtils;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler, Observer<List<Movie>> {
 
     private RecyclerView mRecyclerView;
     private MovieAdapter mMovieAdapter;
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private MovieSearchType movieSearchType = MovieSearchType.MOST_POPULAR;
 
     private int mScrollPosition = RecyclerView.NO_POSITION;
+    private List<Movie> movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     }
 
     private void loadMoviesData(MovieSearchType action) {
-        new FetchMovieSearchTask().execute(action.name());
+        new FetchMovieSearchTask(this).execute(action.name());
     }
 
     @Override
@@ -90,60 +95,50 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         startActivity(intentToStartDetailActivity);
     }
 
-    public class FetchMovieSearchTask extends AsyncTask<String, Void, Movie[]> {
+    @Override
+    public void onChanged(@Nullable List<Movie> movies) {
+        if (movieSearchType.equals(MovieSearchType.FAVORITES)) {
+            this.movies = movies;
+            updateMovies();
+        }
+    }
+
+    public class FetchMovieSearchTask extends AsyncTask<String, Void, Void> {
+        public MainActivity activity;
+
+        public FetchMovieSearchTask(MainActivity a)
+        {
+            this.activity = a;
+        }
         @Override
-        protected Movie[] doInBackground(String... params) {
+        protected Void doInBackground(String... params) {
             try {
-                String jsonMovieResponse = null;
-                Movie[] simpleJsonMovieData = null;
                 if(params.length > 0) {
                    MovieSearchType searchType = MovieSearchType.valueOf(params[0]);
-                   switch (searchType) {
-                       case TOP_RATED:
-                           jsonMovieResponse = TheMovieDBUtils
-                                   .topRatedList();
-                           break;
-                       case NOW_PLAYING:
-                           jsonMovieResponse = TheMovieDBUtils
-                                   .nowPlayingList();
-                           break;
-                       case FAVORITES:
-                            List<Movie> movies = mDb.movieDAO().loadFavoriteMovies();
-                            if (movies.size() > 0) {
-                                simpleJsonMovieData = new Movie[movies.size()];
-                                simpleJsonMovieData =  movies.toArray(simpleJsonMovieData);
-                            } else {
-                                simpleJsonMovieData = new Movie[0];
-                            }
-                       case MOST_POPULAR:
-                       default:
-                           jsonMovieResponse = TheMovieDBUtils
-                                   .mostPopularList();
-                           break;
+                   if (searchType.equals(MovieSearchType.FAVORITES)) {
+                       LiveData<List<Movie>> movies = mDb.movieDAO().loadFavoriteMovies();
+                       movies.observe(activity, activity);
+                   } else {
+                       String jsonMovieResponse = TheMovieDBUtils.searchMovies(searchType);
+                       activity.movies = MoviesJsonUtil.convertJsonToMoviesList(jsonMovieResponse);
+
+
                    }
                 } else {
-                    jsonMovieResponse = TheMovieDBUtils
-                            .mostPopularList();
+                    throw new RuntimeException("Invalid search");
                 }
-                if (simpleJsonMovieData == null) {
-                    simpleJsonMovieData = MoviesJsonUtil.convertJsonToMoviesList(jsonMovieResponse);
-                }
-            return simpleJsonMovieData;
-
+                return null;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
+
         }
 
         @Override
-        protected void onPostExecute(Movie[] movieListData) {
-            if (movieListData != null) {
-                mMovieAdapter.setMovieData(movieListData);
-            }
-            if (mRecyclerView != null && mScrollPosition != RecyclerView.NO_POSITION) {
-                mRecyclerView.smoothScrollToPosition(mScrollPosition);
-                mRecyclerView.getLayoutManager().scrollToPosition(mScrollPosition);
+        protected void onPostExecute(Void unused) {
+            if (!movieSearchType.equals(MovieSearchType.FAVORITES)) {
+                updateMovies();
             }
         }
     }
@@ -178,5 +173,15 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         mScrollPosition = 0;
         loadMoviesData(movieSearchType);
         return super.onOptionsItemSelected(item);
+    }
+
+    public void updateMovies() {
+        if (movies != null) {
+            mMovieAdapter.setMovieData(movies);
+        }
+        if (mRecyclerView != null && mScrollPosition != RecyclerView.NO_POSITION) {
+            mRecyclerView.smoothScrollToPosition(mScrollPosition);
+            mRecyclerView.getLayoutManager().scrollToPosition(mScrollPosition);
+        }
     }
 }
