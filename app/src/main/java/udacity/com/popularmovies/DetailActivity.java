@@ -59,7 +59,6 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
         tvDescription = findViewById(R.id.tvDescription);
         ivPoster = findViewById(R.id.ivPoster);
         rvRating = findViewById(R.id.ratingBar);
-        rvRating.setMax(10);
         tvReleaseDate = findViewById(R.id.tvReleaseDate);
 
         mDb = FavoriteDatabase.getsInstance(getApplicationContext());
@@ -74,7 +73,7 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
             tvDescription.setText(movie.getDescription());
             Picasso.get().load(movie.getBackdropPath())
                     .placeholder(R.drawable.placeholder).into(ivPoster);
-            rvRating.setRating(movie.getRating());
+            rvRating.setRating(calculateStars(movie.getRating()));
             tvReleaseDate.setText(String.format("Release Date: %s", movie.getReleaseDate()));
 
             LinearLayoutManager movieVideosLinearLayoutManager = new LinearLayoutManager(this);
@@ -218,7 +217,8 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
         } else {
             menu.getItem(0).setIcon(R.drawable.ic_favorite_border_white_48dp);
         }
-        new LoadFavoriteTask(this).execute(movie.getMovieId());
+        //new LoadFavoriteTask(this).execute(movie.getMovieId());
+        loadFavoriteStatus();
         this.menu = menu;
         return true;
     }
@@ -241,5 +241,25 @@ public class DetailActivity extends AppCompatActivity implements MovieTrailersAd
     private void updateFavoriteStatus(boolean isFav) {
         isFavorite = isFav;
         invalidateOptionsMenu();
+    }
+
+    private void loadFavoriteStatus() {
+        final LiveData<Movie> favMovie = mDb.movieDAO().load(movie.getMovieId());
+        favMovie.observe(this, new Observer<Movie>() {
+            @Override
+            public void onChanged(@Nullable Movie movie) {
+                favMovie.removeObserver(this);
+                try {
+                    isFavorite = movie != null;
+                    updateFavoriteStatus(isFavorite);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private float calculateStars(int voteAvg) {
+        return (voteAvg * 5)/10;
     }
 }
