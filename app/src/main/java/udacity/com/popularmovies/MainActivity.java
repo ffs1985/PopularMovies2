@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
     private MovieSearchType movieSearchType = MovieSearchType.MOST_POPULAR;
 
-    private int mScrollPosition = RecyclerView.NO_POSITION;
+    private int mScrollPosition = 0;
     private List<Movie> movies;
 
     @Override
@@ -77,8 +77,10 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
             loadMoviesData(movieSearchType);
 
             mScrollPosition = savedInstanceState.getInt("scroll_position");
-            mRecyclerView.smoothScrollToPosition(mScrollPosition);
-            mRecyclerView.getLayoutManager().scrollToPosition(mScrollPosition);
+            if(mScrollPosition != RecyclerView.NO_POSITION) {
+                mRecyclerView.smoothScrollToPosition(mScrollPosition);
+                mRecyclerView.getLayoutManager().scrollToPosition(mScrollPosition);
+            }
         }
     }
 
